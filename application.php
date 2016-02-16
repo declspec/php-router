@@ -4,55 +4,71 @@ require("route.php");
 require("urlmatcher.php");
 
 class Application {
-    private $_routes;
-    private $_matchers;
+    private $_routes = array();
+    private $_matchers = array();
     
-    public function __construct() {
-        $this = new Router();   
-    }  
-    
+
     public function run() {
-        $req = new Request();
+        $req = new Request();  
         
-        
-        
-        
-        $route = $this->handle($req->method, $req->path, $params);
-        if ($route === null)
-            return;
-            
-        $req->params = $params;
-        call_user_func($route->handler, $req);        
+        if ($this->handleRequest($req) !== false)
+            return; // TODO: How to handle 404s
     }
       
     
     // Router wrappers
-    public function all($path, callable $handler) {
-        $this->registerRoute(null, $path, $handler);   
+    public function all($path, $middleware, $handler=null) {
+        $this->registerRoute(null, $path, $middleware, $handler);   
     }
     
-    public function get($path, callable $handler) {
-        $this->registerRoute("GET", $path, $handler);   
+    public function get($path, $middleware, $handler=null) {
+        $this->registerRoute("GET", $path, $middleware, $handler);   
     }
     
-    public function post($path, callable $handler) {
-        $this->registerRoute("POST", $path, $handler);   
+    public function post($path, $middleware, $handler=null) {
+        $this->registerRoute("POST", $path, $middleware, $handler);   
     }
     
-    public function put($path, callable $handler) {
-        $this->registerRoute("PUT", $path, $handler);   
+    public function put($path, $middleware, $handler=null) {
+        $this->registerRoute("PUT", $path, $middleware, $handler);   
     }
     
-    public function delete($path, callable $handler) {
-        $this->registerRoute("DELETE", $path, $handler);   
+    public function delete($path, $middleware, $handler=null) {
+        $this->registerRoute("DELETE", $path, $middleware, $handler);   
     }
     
-    private function registerRoute($method, $path, callable $handler) {
-        $this->_routes[] = new Route($method, $path, $handler);   
+    private function registerRoute($method, $path, $middleware, $handler) {
+        if ($handler === null) {
+            $handler = $middleware;
+            $middleware = null;   
+        }
+
+        $this->_routes[] = new Route($method, $path, $middleware, $handler);   
     }
     
     private function handleRequest($req) {
-        // First, find a matching route.   
+        $route = $this->findRoute($req, $params);
+        if ($route === null)
+            return false;
+            
+        $url = $req->url; // keep track of the URL.
+        
+        if ($route->middleware !== null) {
+            foreach($route->middleware as $mw) {
+                if (call_user_func($mw, $req) === true)
+                    return true;
+                else if ($req->url !== $url)
+                    return $this->handleRequest($req) !== false;   
+            }
+        }
+        
+        // All middleware executed and no handler found
+        return call_user_func($route->handler, $req)
+            || ($url !== $req->url && $this->handleRequest($req) !== false)
+            || false;
+    }
+    
+    private function findRoute($req, &$params) { 
         foreach($this->_routes as $route) {
             if ($route->method !== null && $route->method !== $req->method) 
                 continue;
@@ -62,9 +78,10 @@ class Application {
                 ? $this->_matchers[$id]
                 : ($this->_matchers[$id] = UrlMatcher::create($route->path));
             
-            if ($matcher->match($req->url, $params)) {
-                
-            }  
+            if ($matcher->match($req->path, $params)) 
+                return $route;    
         }
+        
+        return null;
     }
 };
