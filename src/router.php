@@ -58,6 +58,10 @@ class Router {
         $this->_routeManager->register("DELETE", $path, $middleware, $handler);   
     }
     
+    public function route($method, $path, $middleware, $handler=null) {
+        $this->_routerManager->register($method, $path, $middleware, $handler);
+    }
+    
     public function error(callable $handler) {
         $this->_errorHandlers[] = $handler;   
     }
