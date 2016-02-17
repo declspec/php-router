@@ -1,5 +1,5 @@
 <?php
-require("application.php");
+require("src/application.php");
 
 function loggingMiddleware($req) {
     echo "<!--\n";

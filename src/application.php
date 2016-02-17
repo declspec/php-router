@@ -1,7 +1,7 @@
 <?php
-require("request.php");
-require("response.php");
-require("router.php");
+require(__DIR__ . '/lib/request.php');
+require(__DIR__ . '/lib/response.php');
+require(__DIR__ . '/lib/router.php');
 
 class Application {
     private $_router;
