@@ -14,6 +14,8 @@ class Request {
     public $xhr;
     public $json;
     
+    private $_data = array();
+    
     public function __construct() {
         $this->method = strtoupper($_SERVER["REQUEST_METHOD"]);
         $this->url = $_SERVER["REQUEST_URI"];
@@ -37,6 +39,21 @@ class Request {
         $this->query = $_GET;
         $this->body = $this->json ? json_decode(file_get_contents("php://input"), true) : $_POST;
         $this->cookies = $_COOKIE;        
+    }
+    
+    // Allow arbitrary data to be set on the request.
+    public function __get($name) {
+        if (array_key_exists($name, $this->_data))
+            return $this->_data[$name];
+        throw new BadPropertyException($this, $name);
+    }
+    
+    public function __set($name, $value) {
+        $this->_data[$name] = $value;
+    }
+    
+    public function __isset($name) {
+        return isset($this->_data[$name]);
     }
 };
 ?>
