@@ -69,6 +69,64 @@ $router->get('/user/:id(\d+)', function($req, $res) {
 	// Route will run for "/user/123", but not "/user/foobar"
 	$res->send($req->params);
 });
+
+// A route handler can be any 'callable' expression, including an instance method on a class:
+require("controller.php"); // contains a class called 'Controller' with a method 'home'
+$controller = new Controller();
+
+$route->get("/home", array($controller, "home")); 
+```
+
+### Middleware
+
+Middleware is just a fancy name for partial route handlers. That is, route handlers that may not completely handle the request. 
+The function signature is identical to any other route handler. The only difference between the two is that middleware would usually 
+contain an explicit `return false` to indicate that it hasn't completely handled the request, allowing other route handlers to run 
+after the middleware.
+
+Middleware is typically used to apply re-usable functionality to multiple routes, without cluttering up their individual handlers with
+large amounts of duplicated code.
+
+One of the most common applications of middleware is authentication. By defining the authentication logic as a piece of middleware, 
+you can avoid bloating your route handlers with authentication checks.
+
+```php
+$authMiddleware = function($req, $res) {
+    // explicit return false to indicate that the request hasn't been handled (when the user is authenticated)
+	if (isset($req->user))
+    	return false; 
+      
+    $res->redirect("/auth/login?returnUrl=" . urlencode($req->url));
+};
+
+$router->get("/user", $authMiddleware, function($req, $res) {
+    // No need to check $req->user as this route handler won't execute if the middleware failed.
+    $res->send($req->user);
+});
+```
+
+Global middleware can also be created. Think of global middleware as a route that matches any and all paths (regardless of HTTP method). 
+It will execute after any previously defined routes and before any routes defined after its definition. For example:
+
+```php
+// Middleware won't run for this route handler
+$router->get('/', function($req, $res) {});
+
+$router->middleware(function($req, $res) {
+    // Log the request details in an HTML comment for debugging.
+    // NOTE: Sending data in middleware is not a good idea in the real world.
+    // once data has been sent by the server, no routes can change the HTTP headers (i.e. do redirects, set the status code, etc.)
+    $data = "<!--\n" . print_r($req, true) . "\n-->\n";
+    $res->send($data);
+    
+    // Let the router know the middleware didn't handle the request completely.
+    return false;
+});
+
+// The middleware will run for this and all following routes.
+$route->get('/test', function($req, $res) { 
+    $res->send('<h1>Testing Middleware</h1>');
+});
 ```
 
 ### Handling the current request
