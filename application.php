@@ -7,8 +7,8 @@ class Application {
     private $_router;
     private $_errorHandlers = array();
     
-    public function __construct() {
-        $this->_router = new Router();   
+    public function __construct($baseUrl=null) {
+        $this->_router = new Router($baseUrl);   
     }
 
     public function run() {
@@ -34,6 +34,10 @@ class Application {
     }
 
     // Router wrappers
+    public function middleware(callable $handler) {
+        $this->_router->register(null, null, null, $handler);   
+    }
+    
     public function all($path, $middleware, $handler=null) {
         $this->_router->register(null, $path, $middleware, $handler);   
     }

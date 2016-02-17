@@ -5,6 +5,14 @@ require('urlmatcher.php');
 class Router {
     private $_routes = array();   
     private $_matchers = array();
+    private $_baseUrl;
+    
+    public function __construct($baseUrl) {
+        if ($baseUrl !== null) 
+            $baseUrl = '/'.trim($baseUrl, '/');
+
+        $this->_baseUrl = $baseUrl;      
+    }
     
     public function register($method, $path, $middleware, $handler) {
         if ($handler === null) {
@@ -24,6 +32,9 @@ class Router {
         $search = strpos($url, '?');
         if ($search !== false)
             $url = substr($url, 0, $search);
+        
+        if ($this->_baseUrl !== null) 
+            $url = substr($url, strlen($this->_baseUrl));        
         
         foreach($this->_routes as $route) {
             if ($route->method !== null && $route->method !== $method) 
