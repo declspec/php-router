@@ -5,15 +5,13 @@ function loggingMiddleware($req) {
     echo "<!--\n";
     var_dump($req);
     echo "\n-->\n";
+    
+    return false;
 }
 
 $starttime = microtime(true);
 
 $app = new Application();
-
-$app->all("*", 'loggingMiddleware', function($req) {
-    echo "<h1>Index Page</h1>"; 
-});
 
 $app->get("/:param", 'loggingMiddleware', function($req) {
     echo "<h1>Not Index</h1>"; 

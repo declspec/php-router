@@ -7,7 +7,7 @@ class Route {
     
     public function __construct($method, $path, $middleware, $handler) {
         if (!is_callable($handler))
-            throw new InvalidArgumentException("\$handler must be a callable expression");
+            throw new InvalidArgumentException('$handler must be a callable expression');
             
         $this->method = $method !== null ? strtoupper($method) : null;
         $this->path = $path;
