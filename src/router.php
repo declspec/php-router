@@ -91,7 +91,7 @@ class Router {
                 }
             }
             
-            $handled = call_user_func($route->handler, $req) !== false;
+            $handled = call_user_func($route->handler, $req, $res) !== false;
             if (!$handled && $url !== $req->url)
                 return $this->handleRequest($req, $res, $depth + 1);
         }
