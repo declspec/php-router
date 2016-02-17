@@ -1,14 +1,14 @@
 <?php
 require(__DIR__ . '/lib/request.php');
 require(__DIR__ . '/lib/response.php');
-require(__DIR__ . '/lib/router.php');
+require(__DIR__ . '/lib/route-manager.php');
 
-class Application {
-    private $_router;
+class Router {
+    private $_routeManager;
     private $_errorHandlers = array();
     
     public function __construct($baseUrl=null) {
-        $this->_router = new Router($baseUrl);   
+        $this->_routeManager = new RouteManager($baseUrl);   
     }
 
     public function run() {
@@ -35,27 +35,27 @@ class Application {
 
     // Router wrappers
     public function middleware(callable $handler) {
-        $this->_router->register(null, null, null, $handler);   
+        $this->_routeManager->register(null, null, null, $handler);   
     }
     
     public function all($path, $middleware, $handler=null) {
-        $this->_router->register(null, $path, $middleware, $handler);   
+        $this->_routeManager->register(null, $path, $middleware, $handler);   
     }
     
     public function get($path, $middleware, $handler=null) {
-        $this->_router->register("GET", $path, $middleware, $handler);   
+        $this->_routeManager->register("GET", $path, $middleware, $handler);   
     }
     
     public function post($path, $middleware, $handler=null) {
-        $this->_router->register("POST", $path, $middleware, $handler);   
+        $this->_routeManager->register("POST", $path, $middleware, $handler);   
     }
     
     public function put($path, $middleware, $handler=null) {
-        $this->_router->register("PUT", $path, $middleware, $handler);   
+        $this->_routeManager->register("PUT", $path, $middleware, $handler);   
     }
     
     public function delete($path, $middleware, $handler=null) {
-        $this->_router->register("DELETE", $path, $middleware, $handler);   
+        $this->_routeManager->register("DELETE", $path, $middleware, $handler);   
     }
     
     public function error(callable $handler) {
@@ -73,7 +73,7 @@ class Application {
         $handled = false;
         
         while(!$handled) {
-            $route = $this->_router->match($req->url, $req->method, $params);
+            $route = $this->_routeManager->match($req->url, $req->method, $params);
             if ($route === null)
                 return false; // no more matching routes, bail.
             

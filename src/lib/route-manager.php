@@ -2,7 +2,7 @@
 require('route.php');
 require('urlmatcher.php');
 
-class Router {
+class RouteManager {
     private $_routes = array();   
     private $_matchers = array();
     private $_baseUrl;

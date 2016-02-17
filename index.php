@@ -1,5 +1,5 @@
 <?php
-require("src/application.php");
+require("src/router.php");
 
 function loggingMiddleware($req) {
     echo "<!--\n";
@@ -13,7 +13,7 @@ $baseUrl = substr(__DIR__, strlen($_SERVER["DOCUMENT_ROOT"]));
 
 $starttime = microtime(true);
 
-$app = new Application($baseUrl);
+$app = new Router($baseUrl);
 
 $app->get("/:param", 'loggingMiddleware', function($req) {
     echo "<h1>Not Index</h1>"; 
