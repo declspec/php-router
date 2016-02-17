@@ -83,6 +83,10 @@ class Response {
         return $this;
     }
     
+    public function redirect($location, $status=302) {
+        $this->status($status)->set("Location", $location);
+    }
+    
     public function get($header) {
         $header = strtolower($header);
         return isset($this->_headers[$header])
