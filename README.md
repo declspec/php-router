@@ -9,6 +9,37 @@ It is **not** an application development framework. If you like the concept behi
 are interested in a similarly bare-bones development framework, take a look at the
 [**php-wireframe**](https://github.com/declspec/php-wireframe) project!
 
+### Basic example
+
+If you're just interested in seeing a very basic working example and don't want to read any further. Fear not:
+
+```php
+require("php-router/router.php");
+
+$router = new Router();
+
+// Define the index
+$router->all('/', function($req, $res) {
+    $res->send('<h1>Hello world, from php-router</h1>');
+});
+
+// Define a 404 handler as the last regular route
+$router->all('*', function($req, $res) {
+    $res->status(404)->send('<h1>Not Found</h1>');
+});
+
+// Define an error handler for any exceptions that occur in the routes
+$router->error(function($ex, $req, $res) {
+    $html = "<h1>Internal Server Error</h1>\n" .
+    	"<strong>" . htmlentities($ex->getMessage(), ENT_QUOTES, "UTF-8") . "</strong>\n" .
+        "<pre><code>" . htmlentities($ex->getTraceAsString(), ENT_QUOTES, "UTF-8") . "</code></pre>";
+    
+    $res->status(500)->send($html);
+});
+
+$router->run();
+```
+
 ### Route handlers
 
 Each route requires a **handler**, which can be any `callable` PHP expression 
