@@ -84,7 +84,11 @@ class UrlMatcher {
             $regexp .= $pattern;
         }
         
-        return new UrlMatcher("/^\/{$regexp}\/?$/i", $params);
+        // Append any leftover literals to the regexp
+        if ($idx < $length)
+            $regexp .= str_replace('/', '\/', substr($path, $idx));
+            
+        return new UrlMatcher("/^\\/{$regexp}\\/?$/i", $params);
     }   
     
     private static function isLeadingSlash($path, $idx) {
